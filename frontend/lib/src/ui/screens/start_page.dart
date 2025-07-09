@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/feature_tile.dart';
+import '../screens/registration/registration_page_navigator.dart';
+
 
 class StartPage extends StatelessWidget {
   const StartPage({super.key});
@@ -100,7 +102,10 @@ class StartPage extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      // TODO: Navigate to login
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                      );
                     },
                     child: const Text('Log In'),
                   ),
