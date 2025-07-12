@@ -1,0 +1,123 @@
+openapi: 3.0.1
+info:
+  title: Profile Service API
+  version: 1.0.0
+
+paths:
+  /api/v1/profiles:
+    post:
+      summary: Create user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileInput'
+      responses:
+        '201':
+          description: Profile created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Profile created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/v1/profiles/{user_id}:
+    get:
+      summary: Get user profile
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Profile'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    ProfileInput:
+      type: object
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - gender
+        - date_of_birth
+        - height_cm
+        - weight_kg
+        - activity_level
+        - goal_weight_kg
+        - objective
+      properties:
+        user_id:       {type: string, format: uuid}
+        first_name:    {type: string}
+        last_name:     {type: string}
+        gender:        {type: string, enum: [male,female,other]}
+        date_of_birth: {type: string, format: date}
+        height_cm:     {type: integer}
+        weight_kg:     {type: integer}
+        activity_level:{type: string, enum: [low,moderate,high]}
+        goal_weight_kg:{type: integer}
+        objective:     {type: string}
+    Profile:
+      type: object
+      properties:
+        user_id:        {type: string, format: uuid}
+        first_name:     {type: string}
+        last_name:      {type: string}
+        gender:         {type: string}
+        date_of_birth:  {type: string, format: date}
+        height_cm:      {type: integer}
+        weight_kg:      {type: integer}
+        activity_level: {type: string}
+        goal_weight_kg: {type: integer}
+        objective:      {type: string}
+        created_at:     {type: string, format: date-time}
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:    {type: string}
+            message: {type: string}
