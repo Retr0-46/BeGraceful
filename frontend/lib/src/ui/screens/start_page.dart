@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/feature_tile.dart';
 import '../screens/registration/registration_page_navigator.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../screens/login_dialog.dart';
 
 
 class StartPage extends StatelessWidget {
@@ -25,12 +27,18 @@ class StartPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 40),
             child: Column(
               children: const [
-                Icon(Icons.local_florist, size: 60, color: Colors.white),
-                SizedBox(height: 10),
-                Text(
-                  'BeGraceful',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.local_florist, size: 40, color: Colors.white),
+                    SizedBox(height: 10),
+                    Text(
+                      'BeGraceful',
+                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ] 
                 ),
+                
                 SizedBox(height: 5),
                 Text(
                   'Your journey to mindful eating starts here',
@@ -55,27 +63,43 @@ class StartPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: ListView(
-                children: const [
+                children: [
                   FeatureTile(
-                    icon: Icons.local_dining,
+                    icon: SvgPicture.asset(
+                      'assets/images/start_page/apple-emoji.svg',
+                      height: 24,
+                      width: 24,
+                    ),
                     title: 'Calorie Counter',
                     subtitle: 'Monitor calories, meals, and nutrition with our comprehensive food database',
                     color: Colors.lightBlueAccent,
                   ),
                   FeatureTile(
-                    icon: Icons.directions_run,
+                    icon: SvgPicture.asset(
+                      'assets/images/start_page/running-emoji.svg',
+                      height: 24,
+                      width: 24,
+                    ),
                     title: 'Activity Tracking',
                     subtitle: 'Log workouts, track steps, and monitor calories burned throughout the day',
                     color: Colors.greenAccent,
                   ),
                   FeatureTile(
-                    icon: Icons.restaurant_menu,
+                    icon: SvgPicture.asset(
+                      'assets/images/start_page/apple-emoji.svg',
+                      height: 24,
+                      width: 24,
+                    ),
                     title: 'Healthy Recipes',
                     subtitle: 'Discover personalized recipes based on your preferences and dietary needs',
                     color: Colors.orangeAccent,
                   ),
                   FeatureTile(
-                    icon: Icons.track_changes,
+                    icon: SvgPicture.asset(
+                      'assets/images/start_page/goal-emoji.svg',
+                      height: 24,
+                      width: 24,
+                    ),
                     title: 'Personal Goals',
                     subtitle: 'Set weight goals and track progress with personalized calorie recommendations',
                     color: Colors.purpleAccent,
@@ -86,7 +110,7 @@ class StartPage extends StatelessWidget {
           ),
 
           const Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(10.0),
             child: Text(
               'Small changes lead to big results.\nLet\'s begin!',
               textAlign: TextAlign.center,
@@ -96,30 +120,61 @@ class StartPage extends StatelessWidget {
 
           // Buttons
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            child: Row(
+            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
+            
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RegistrationPage()),
-                      );
-                    },
-                    child: const Text('Log In'),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF4B4DE9), Color(0xFFA033DF)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Get Started',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6C63FF),
+
+                const SizedBox(height: 12),
+
+                // Login button (outlined style)
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50),
+                    side: const BorderSide(color: Colors.black),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    alignment: Alignment.center,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => const LoginDialog(),
+                    );
+                  },
+                  child: const Text(
+                    'Already Have An Account? Log In',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
                     ),
-                    onPressed: () {
-                      // TODO: Navigate to sign up
-                    },
-                    child: const Text('Sign Up', style: TextStyle(color: Colors.white),),
                   ),
                 ),
               ],

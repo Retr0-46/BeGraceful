@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FeatureTile extends StatelessWidget {
-  final IconData icon;
+  final Widget icon;
   final String title;
   final String subtitle;
   final Color color;
@@ -19,7 +19,7 @@ class FeatureTile extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: color.withOpacity(0.3),
-        child: Icon(icon, color: color),
+        child: icon,
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(subtitle),

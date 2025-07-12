@@ -13,10 +13,5 @@ class RegistrationData {
   String? goal;
   double? goalWeight;
 
-/*   // Step 3 - optional
-  List<String>? dietaryPreferences;
-  List<String>? allergies;
-  List<String>? healthConsitions; */
-
   RegistrationData();
 }

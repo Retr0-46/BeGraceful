@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../models/registration_data.dart';
 import '../../../services/auth_service.dart';
+import 'package:frontend/src/providers/theme_provider.dart';
+import '../../themes/app_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class RegistrationStep1 extends StatefulWidget {
   final VoidCallback onNext;
@@ -16,6 +20,7 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   bool isLoading = false;
   String? error;
@@ -44,39 +49,108 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            const Text('Create your account', style: TextStyle(fontSize: 22)),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-              validator: (val) =>
-                  val != null && emailRegex.hasMatch(val) ? null : 'Invalid email format',
-            ),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
-              validator: (val) =>
-                  val != null && passwordRegex.hasMatch(val) && val.length >= 6
-                      ? null
-                      : 'Only letters/numbers/symbols, min 6 chars',
-            ),
-            if (error != null) ...[
-              const SizedBox(height: 10),
-              Text(error!, style: const TextStyle(color: Colors.red)),
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).colorScheme.onBackground,
+        elevation: 0,
+        centerTitle: true,
+
+        title: RichText(
+          text: TextSpan(
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold,),
+            children: [
+              TextSpan(
+                text: 'Welcome to ',
+                style: TextStyle(color: Theme.of(context).colorScheme.onBackground,),
+              ),
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: SvgPicture.asset(
+                  'assets/images/BeGraceful.svg',
+                  height: 20,
+                ),
+              ),
             ],
-            const Spacer(),
-            isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(onPressed: _submit, child: const Text('Next')),
-          ],
+          ),
         ),
+
+        actions: [
+          IconButton(
+            icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () {
+              themeProvider.toggleTheme(!themeProvider.isDarkMode);
+            },
+          ),
+        ],
+      ),
+      
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LinearProgressIndicator(
+                  value: 0.5,
+                  backgroundColor: Colors.grey,
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                ),
+
+                const SizedBox(height: 24),
+                const Text('Create your account', style: TextStyle(fontSize: 18)),
+
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (val) =>
+                      val != null && emailRegex.hasMatch(val) ? null : 'Invalid email format',
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  validator: (val) =>
+                      val != null && passwordRegex.hasMatch(val) && val.length >= 6
+                          ? null
+                          : 'Only letters/numbers/symbols, min 6 chars',
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Confirm Password'),
+                  validator: (val) => val == _passwordController.text
+                      ? null
+                      : 'Passwords do not match',
+                ),
+                if (error != null) ...[
+                  const SizedBox(height: 10),
+                  Text(error!, style: const TextStyle(color: Colors.red)),
+                ],
+                const Spacer(),
+                SizedBox(
+                  width: double.infinity,
+                  child: isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _submit,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text('Next'),
+                        ),
+                ),
+              ],
+            )
+          )
+        )
       ),
     );
   }
