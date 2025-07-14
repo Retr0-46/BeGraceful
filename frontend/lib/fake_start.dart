@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:frontend/src/models/registration_data.dart';
+import 'package:frontend/src/ui/screens/registration/registration_step2_profile.dart';
 import 'package:frontend/src/providers/theme_provider.dart';
 import 'src/ui/themes/app_theme.dart';
-import 'src/ui/screens/start_page.dart';
-import 'package:frontend/routes.dart';
-import 'package:frontend/src/ui/screens/profile/profile_screen.dart';
-import 'package:frontend/src/ui/screens/main_navigation.dart';
+import 'package:provider/provider.dart';
+
 
 void main() {
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
-      child: const MyApp(),
+      child: const TestApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class TestApp extends StatelessWidget {
+  const TestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +28,7 @@ class MyApp extends StatelessWidget {
       themeMode: themeProvider.themeMode,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      routes: appRoutes,
-      initialRoute: '/', 
-      //home: const ProfileScreen(), // не забыть обратно поменять на const StartPage()
-      home: const MainNavigation(),
+      home: RegistrationStep2(data: RegistrationData(), onFinish: () => print("Done!"),),
     );
   }
 }
