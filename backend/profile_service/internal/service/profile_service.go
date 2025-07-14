@@ -2,7 +2,6 @@ package service
 
 import (
     "errors"
-    "time"
 
     "profile_service/internal/model"
     "profile_service/internal/repository"
@@ -23,16 +22,12 @@ func NewProfileService(r repository.ProfileRepo) *ProfileService {
 
 func (s *ProfileService) CreateProfile(input *model.ProfileInput) error {
     // конвертация ProfileInput → model.Profile
-    dob, err := time.Parse("2006-01-02", input.DateOfBirth)
-    if err != nil {
-        return err
-    }
     p := &model.Profile{
         UserID:        input.UserID,
         FirstName:     input.FirstName,
         LastName:      input.LastName,
         Gender:        input.Gender,
-        DateOfBirth:   dob,
+        DateOfBirth:   input.DateOfBirth,
         HeightCm:      input.HeightCm,
         WeightKg:      input.WeightKg,
         ActivityLevel: input.ActivityLevel,

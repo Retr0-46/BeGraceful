@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   db:
     image: postgres:15
@@ -6,6 +5,11 @@ services:
       POSTGRES_USER: pguser
       POSTGRES_PASSWORD: pgpass
       POSTGRES_DB: begraceful
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pguser -d begraceful"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d
@@ -15,11 +19,12 @@ services:
   auth_service:
     build: ./auth_service
     environment:
-      DATABASE_URL: "postgres://pguser:pgpass@db:5432/begraceful?sslmode=disable"
-      JWT_SECRET: "super-secret-key"
+      DATABASE_URL:      "postgres://pguser:pgpass@db:5432/begraceful?sslmode=disable"
+      JWT_SECRET:        "super-secret-key"
       PROFILE_SERVICE_URL: "http://profile_service:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8001:8080"
 
@@ -28,9 +33,23 @@ services:
     environment:
       DATABASE_URL: "postgres://pguser:pgpass@db:5432/begraceful?sslmode=disable"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8002:8080"
+
+  calories_service:
+    build: ./calories_service
+    environment:
+      DATABASE_URL:       "postgres://pguser:pgpass@db:5432/begraceful?sslmode=disable"
+      PROFILE_SERVICE_URL: "http://profile_service:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      profile_service:
+        condition: service_started
+    ports:
+      - "8003:8080"
 
 volumes:
   db-data:

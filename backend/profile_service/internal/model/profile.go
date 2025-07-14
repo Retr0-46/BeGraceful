@@ -8,7 +8,7 @@ type Profile struct {
     FirstName     string    `json:"first_name"`
     LastName      string    `json:"last_name"`
     Gender        string    `json:"gender"`
-    DateOfBirth   time.Time `json:"date_of_birth"`
+    DateOfBirth   string    `json:"date_of_birth"`
     HeightCm      int       `json:"height_cm"`
     WeightKg      int       `json:"weight_kg"`
     ActivityLevel string    `json:"activity_level"`
