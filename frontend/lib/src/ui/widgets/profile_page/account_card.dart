@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/src/models/registration_data.dart';
+import 'package:frontend/src/ui/screens/profile/edit_profile_screen.dart';
+import 'package:frontend/src/storage/user_temp_storage.dart';
 
 class AccountCard extends StatelessWidget {
-  const AccountCard({super.key});
+  final void Function(RegistrationData updatedUser)? onProfileEdited;
+
+const AccountCard({
+  super.key,
+  this.onProfileEdited,
+});
 
   @override
   Widget build(BuildContext context) {

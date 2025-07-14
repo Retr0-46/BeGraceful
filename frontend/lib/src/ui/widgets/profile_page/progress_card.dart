@@ -1,15 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/src/models/registration_data.dart';
+import 'package:frontend/src/storage/user_temp_storage.dart';
 
-class ProgressCard extends StatelessWidget {
+class ProgressCard extends StatefulWidget {
   final RegistrationData user;
   final double currentWeight; 
+  final void Function(double newWeight)? onWeightUpdated;
 
-const ProgressCard({super.key, required this.user, required this.currentWeight});
+  const ProgressCard({
+    super.key,
+    required this.user,
+    required this.currentWeight,
+    this.onWeightUpdated,
+  });
+
+  @override
+  State<ProgressCard> createState() => _ProgressCardState();
+}
+
+class _ProgressCardState extends State<ProgressCard> {
+  late double currentWeight;
+
+  @override
+  void initState() {
+    super.initState();
+    currentWeight = widget.currentWeight;
+  }
+
+  void _showUpdateDialog() async {
+    final controller = TextEditingController();
+
+    final newWeight = await showDialog<double>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Update Weight'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(labelText: 'Enter new weight (kg)'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final value = double.tryParse(controller.text);
+                if (value != null) {
+                  Navigator.of(context).pop(value);
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (newWeight != null) {
+      UserTempStorage.updateWeight(newWeight);
+      widget.onWeightUpdated?.call(newWeight);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final double? start = user.weight; 
-    final double? goal = user.goalWeight;
+    final double? start = widget.user.weight; 
+    final double? goal = widget.user.goalWeight;
 
     double progress = 0;
     double alreadyLost = 0;
@@ -46,46 +105,43 @@ const ProgressCard({super.key, required this.user, required this.currentWeight})
             ),
             const SizedBox(height: 12),
             RichText(
-  text: TextSpan(
-    style: const TextStyle(
-      fontSize: 16,
-      color: Color(0xFF4B5563),
-    ),
-    children: [
-      const TextSpan(
-        text: 'Goal: ',
-        style: TextStyle(fontWeight: FontWeight.w600), 
-      ),
-      TextSpan(
-        text: user.goal ?? '—',
-      ),
-    ],
-  ),
-),
+              text: TextSpan(
+                style: const TextStyle(fontSize: 16, color: Color(0xFF4B5563)),
+                children: [
+                  const TextSpan(
+                    text: 'Goal: ',
+                    style: TextStyle(fontWeight: FontWeight.w600), 
+                  ),
+                  TextSpan(
+                    text: widget.user.goal ?? '—',
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 8),
             Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'You have already lost ${alreadyLost.toStringAsFixed(1)} kg!',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF000000), 
-                      ),
-                      textAlign: TextAlign.center,
+              child: Column(
+                children: [
+                  Text(
+                    'You have already lost ${alreadyLost.toStringAsFixed(1)} kg!',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF000000), 
                     ),
-                    const SizedBox(height: 0),
-                    const Text(
-                      'Keep up the good work!',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF4B5563), 
-                      ),
-                      textAlign: TextAlign.center,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 0),
+                  const Text(
+                    'Keep up the good work!',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF4B5563), 
                     ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
+            ),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -120,16 +176,14 @@ const ProgressCard({super.key, required this.user, required this.currentWeight})
             const SizedBox(height: 12),
             Center(
               child: ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Реализовать обновление веса
-                },
+                onPressed: _showUpdateDialog,
                 icon: Image.asset(
                   'assets/images/profile_page/update_weight_icon.png',
                   height: 20,
                 ),
                 label: const Text('Update Weight'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF5371F4),
+                  backgroundColor: const Color(0xFF5371F4),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
