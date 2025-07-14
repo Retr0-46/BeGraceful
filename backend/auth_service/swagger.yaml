@@ -1,0 +1,138 @@
+openapi: 3.0.1
+info:
+  title: Auth Service API
+  version: 1.0.0
+
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: Register or login (step 1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: New user created, incomplete profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponseIncomplete'
+        '200':
+          description: Existing user (JWT or incomplete)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/RegisterResponseComplete'
+                  - $ref: '#/components/schemas/RegisterResponseIncomplete'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/auth/complete-profile:
+    post:
+      summary: Complete user profile (step 2)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteProfileRequest'
+      responses:
+        '200':
+          description: Profile completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompleteProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email,password]
+      properties:
+        email:    {type: string, format: email}
+        password: {type: string, minLength: 8}
+    RegisterResponseIncomplete:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            user_id: {type: string, format: uuid}
+            status:  {type: string, enum: [INCOMPLETE_PROFILE]}
+    RegisterResponseComplete:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            jwt:    {type: string}
+            status: {type: string, enum: [OK]}
+    CompleteProfileRequest:
+      type: object
+      required: [user_id,first_name,last_name,gender,date_of_birth,height_cm,weight_kg,activity_level,goal_weight_kg,objective]
+      properties:
+        user_id:       {type: string, format: uuid}
+        first_name:    {type: string}
+        last_name:     {type: string}
+        gender:        {type: string, enum: [male,female,other]}
+        date_of_birth: {type: string, format: date}
+        height_cm:     {type: integer}
+        weight_kg:     {type: integer}
+        activity_level:{type: string, enum: [low,moderate,high]}
+        goal_weight_kg:{type: integer}
+        objective:     {type: string}
+    CompleteProfileResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            jwt:    {type: string}
+            status: {type: string, enum: [PROFILE_COMPLETED]}
+
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict (already exists)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:    {type: string}
+            message: {type: string}

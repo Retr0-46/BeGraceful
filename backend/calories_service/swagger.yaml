@@ -1,0 +1,112 @@
+openapi: 3.0.1
+info:
+  title: Calories Service API
+  version: 1.0.0
+
+paths:
+  /api/v1/calories/food:
+    post:
+      summary: Log consumed food calories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodInput'
+      responses:
+        '201':
+          description: Food entry created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/calories/workout:
+    post:
+      summary: Log workout calories burned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutInput'
+      responses:
+        '201':
+          description: Workout entry created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/calories/summary:
+    get:
+      summary: Get daily calories summary
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Summary data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummaryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    FoodInput:
+      type: object
+      required: [user_id,entry_date,calories]
+      properties:
+        user_id:    {type: string, format: uuid}
+        entry_date: {type: string, format: date}
+        calories:   {type: integer}
+
+    WorkoutInput:
+      type: object
+      required: [user_id,entry_date,calories_burned]
+      properties:
+        user_id:         {type: string, format: uuid}
+        entry_date:      {type: string, format: date}
+        calories_burned: {type: integer}
+
+    SummaryResponse:
+      type: object
+      properties:
+        consumed:  {type: integer}
+        burned:    {type: integer}
+        remaining: {type: integer}
+        goal:      {type: integer}
+
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorPayload'
