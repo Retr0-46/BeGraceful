@@ -15,8 +15,10 @@ class Activity {
     return Activity(
       id: json['id'],
       name: json['name'],
-      durationMinutes: json['unit'],
+      durationMinutes: json['duration_minutes'],
       caloriesPerMinute: (json['calories_per_minute'] as num).toDouble(),
     );
   }
+
+  int get caloriesBurned => (durationMinutes * caloriesPerMinute).round();
 }

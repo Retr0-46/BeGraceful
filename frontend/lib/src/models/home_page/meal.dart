@@ -1,15 +1,15 @@
 class MealEntry {
   final String name;
   final int calories;
-  final double protein;
-  final double fat;
+  final double proteins;
+  final double fats;
   final double carbs;
 
   MealEntry({
     required this.name,
     required this.calories,
-    required this.protein,
-    required this.fat,
+    required this.proteins,
+    required this.fats,
     required this.carbs,
   });
 }

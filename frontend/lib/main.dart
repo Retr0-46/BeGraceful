@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:frontend/src/providers/theme_provider.dart';
 import 'src/ui/themes/app_theme.dart';
 import 'src/ui/screens/start_page.dart';
+import 'package:frontend/routes.dart';
+import 'package:frontend/src/ui/screens/profile/profile_screen.dart';
+import 'package:frontend/src/ui/screens/main_navigation.dart';
 
 void main() {
   runApp(
@@ -26,7 +29,10 @@ class MyApp extends StatelessWidget {
       themeMode: themeProvider.themeMode,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: const StartPage(),
+      routes: appRoutes,
+      initialRoute: '/', 
+      //home: const ProfileScreen(), // не забыть обратно поменять на const StartPage()
+      home: const MainNavigation(),
     );
   }
 }

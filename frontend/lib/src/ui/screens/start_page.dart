@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/feature_tile.dart';
+import '../widgets/registration_page/feature_tile.dart';
 import '../screens/registration/registration_page_navigator.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../screens/login_dialog.dart';

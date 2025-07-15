@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../models/activity.dart';
+import '../models/home_page/activity.dart';
 
 class ActivityService {
   static Future<List<Activity>> fetchActivities() async {

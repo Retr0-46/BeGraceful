@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/day_summary.dart';
-import '../models/meal.dart';
-import '../models/activity.dart';
+import '../models/home_page/day_summary.dart';
+import '../models/home_page/meal.dart';
+import '../models/home_page/activity.dart';
 
 class DayProvider extends ChangeNotifier {
   final Map<DateTime, DaySummary> _days = {};
