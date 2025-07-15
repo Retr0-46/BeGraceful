@@ -3,6 +3,8 @@ import '../widgets/registration_page/feature_tile.dart';
 import '../screens/registration/registration_page_navigator.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../screens/login_dialog.dart';
+import 'package:frontend/src/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 
 class StartPage extends StatelessWidget {
@@ -11,7 +13,7 @@ class StartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -26,21 +28,25 @@ class StartPage extends StatelessWidget {
             ),
             padding: const EdgeInsets.symmetric(vertical: 40),
             child: Column(
-              children: const [
+              children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.local_florist, size: 40, color: Colors.white),
-                    SizedBox(height: 10),
-                    Text(
+                    Image.asset(
+                      'assets/images/start_page/clever-icon.png',
+                      width: 40,
+                      height: 40,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
                       'BeGraceful',
                       style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ] 
                 ),
                 
-                SizedBox(height: 5),
-                Text(
+                const SizedBox(height: 5),
+                const Text(
                   'Your journey to mindful eating starts here',
                   style: TextStyle(fontSize: 14, color: Colors.white70),
                 ),
@@ -49,6 +55,25 @@ class StartPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 20),
+
+          Align(
+            alignment: Alignment.topRight,
+            child: Consumer<ThemeProvider>(
+              builder: (context, themeProvider, _) => IconButton(
+                icon: Image.asset(
+                  themeProvider.isDarkMode
+                      ? 'assets/images/main_page/sun-light-theme.png'
+                      : 'assets/images/main_page/moon-dark-theme.png',
+                  width: 24,
+                  height: 24,
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme(!themeProvider.isDarkMode);
+                },
+              ),
+            ),
+          ),
+
           Center(
             child:
             Text(
@@ -65,41 +90,25 @@ class StartPage extends StatelessWidget {
               child: ListView(
                 children: [
                   FeatureTile(
-                    icon: SvgPicture.asset(
-                      'assets/images/start_page/apple-emoji.svg',
-                      height: 24,
-                      width: 24,
-                    ),
+                    icon: Text('🍎'),
                     title: 'Calorie Counter',
                     subtitle: 'Monitor calories, meals, and nutrition with our comprehensive food database',
                     color: Colors.lightBlueAccent,
                   ),
                   FeatureTile(
-                    icon: SvgPicture.asset(
-                      'assets/images/start_page/running-emoji.svg',
-                      height: 24,
-                      width: 24,
-                    ),
+                    icon: Text('🏃‍♀️‍➡️'),
                     title: 'Activity Tracking',
                     subtitle: 'Log workouts, track steps, and monitor calories burned throughout the day',
                     color: Colors.greenAccent,
                   ),
                   FeatureTile(
-                    icon: SvgPicture.asset(
-                      'assets/images/start_page/apple-emoji.svg',
-                      height: 24,
-                      width: 24,
-                    ),
+                    icon: Text('🥗'),
                     title: 'Healthy Recipes',
                     subtitle: 'Discover personalized recipes based on your preferences and dietary needs',
                     color: Colors.orangeAccent,
                   ),
                   FeatureTile(
-                    icon: SvgPicture.asset(
-                      'assets/images/start_page/goal-emoji.svg',
-                      height: 24,
-                      width: 24,
-                    ),
+                    icon: Text('🎯'),
                     title: 'Personal Goals',
                     subtitle: 'Set weight goals and track progress with personalized calorie recommendations',
                     color: Colors.purpleAccent,
@@ -109,12 +118,12 @@ class StartPage extends StatelessWidget {
             ),
           ),
 
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(10.0),
             child: Text(
               'Small changes lead to big results.\nLet\'s begin!',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.black),
+              style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onBackground),
             ),
           ),
 
@@ -157,7 +166,7 @@ class StartPage extends StatelessWidget {
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(50),
-                    side: const BorderSide(color: Colors.black),
+                    side: BorderSide(color: Theme.of(context).colorScheme.onBackground),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     alignment: Alignment.center,
@@ -168,10 +177,10 @@ class StartPage extends StatelessWidget {
                       builder: (context) => const LoginDialog(),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     'Already Have An Account? Log In',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onBackground,
                       fontWeight: FontWeight.w500,
                       fontSize: 14,
                     ),

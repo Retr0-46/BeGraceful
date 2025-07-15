@@ -21,8 +21,19 @@ class FeatureTile extends StatelessWidget {
         backgroundColor: color.withOpacity(0.3),
         child: icon,
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(subtitle),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).textTheme.titleMedium?.color,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: Theme.of(context).textTheme.bodyMedium?.color,
+        ),
+      ),
     );
   }
 }

@@ -10,16 +10,16 @@ import 'package:frontend/src/services/meal_service.dart';
 import 'package:frontend/src/models/home_page/food_item.dart';
 
 
-/* void main() {
+void main() {
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
       child: const TestApp(),
     ),
   );
-} */
+}
 
-/* class TestApp extends StatelessWidget {
+class TestApp extends StatelessWidget {
   const TestApp({super.key});
 
   @override
@@ -35,9 +35,9 @@ import 'package:frontend/src/models/home_page/food_item.dart';
       home: RegistrationStep2(data: RegistrationData(), onFinish: () => print("Done!"),),
     );
   }
-} */
+}
 
-void main() {
+/* void main() {
   runApp(
     MultiProvider(
       providers: [
@@ -73,7 +73,7 @@ class TestApp extends StatelessWidget {
     );
   }
 }
-
+*/
 class MockFoodService extends FoodService {
   MockFoodService() : super(baseUrl: '');
 
@@ -86,4 +86,3 @@ class MockFoodService extends FoodService {
     ];
   }
 }
-

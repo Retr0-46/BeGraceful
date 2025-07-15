@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../models/registration_data.dart';
 import 'registration_step1_auth.dart';
 import 'registration_step2_profile.dart';
+import '../main_navigation.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -17,8 +18,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   void _next() => setState(() => step++);
   void _finish() {
-    // Можно отправить все данные или перейти на главную
-    Navigator.of(context).pop(); // Или navigate to home
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const MainNavigation()),
+    );
   }
 
   @override

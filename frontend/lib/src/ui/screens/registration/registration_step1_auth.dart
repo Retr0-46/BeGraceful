@@ -79,7 +79,13 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
 
         actions: [
           IconButton(
-            icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            icon: Image.asset(
+              themeProvider.isDarkMode
+                  ? 'assets/images/main_page/sun-light-theme.png'
+                  : 'assets/images/main_page/moon-dark-theme.png',
+              width: 24,
+              height: 24,
+            ),
             onPressed: () {
               themeProvider.toggleTheme(!themeProvider.isDarkMode);
             },
