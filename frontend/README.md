@@ -1,16 +1,52 @@
-# frontend
+# BeGraceful Frontend
 
-A new Flutter project.
+## Запуск для Web
 
-## Getting Started
+### 1. Локально (dev-сервер)
 
-This project is a starting point for a Flutter application.
+```sh
+flutter run -d chrome
+```
 
-A few resources to get you started if this is your first Flutter project:
+или
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```sh
+flutter run -d web-server
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Приложение будет доступно по адресу http://localhost:8000 (или другому, указанному в выводе команды).
+
+### 2. Сборка и запуск через Docker
+
+```sh
+# Перейдите в папку frontend
+cd frontend
+# Соберите Docker-образ
+docker build -t begraceful-frontend .
+# Запустите контейнер
+docker run -p 8080:80 begraceful-frontend
+```
+
+Приложение будет доступно по адресу http://localhost:8080
+
+---
+
+## Запуск для Android эмулятора
+
+1. Запустите Android эмулятор через Android Studio или командой:
+   ```sh
+   emulator -avd <имя_эмулятора>
+   ```
+2. Запустите приложение на эмуляторе:
+   ```sh
+   flutter run -d emulator-5554
+   ```
+   (или выберите устройство в Android Studio)
+
+---
+
+## Примечания
+- Для работы с backend убедитесь, что сервисы backend запущены и доступны по нужным адресам (см. lib/src/utils/config.dart).
+- Для web-сборки используется Flutter web (Chrome/web-server).
+- Для Android требуется установленный эмулятор и Android SDK.
+- Для Docker требуется установленный Docker.
