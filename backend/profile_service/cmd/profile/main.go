@@ -5,8 +5,8 @@ import (
     "log"
     "os"
 
+	"github.com/gin-gonic/gin"
     _ "github.com/lib/pq"
-    "github.com/gin-gonic/gin"
 
     "profile_service/internal/handler"
     "profile_service/internal/repository"
@@ -26,14 +26,16 @@ func main() {
     defer db.Close()
 
     repo := repository.NewProfileRepo(db)
-    svc  := service.NewProfileService(repo)
-    hnd  := handler.NewProfileHandler(svc)
+	svc := service.NewProfileService(repo)
+	hnd := handler.NewProfileHandler(svc)
 
     r := gin.Default()
     api := r.Group("/api/v1/profiles")
     {
         api.POST("", hnd.CreateProfile)
         api.GET("/:user_id", hnd.GetProfile)
+		api.PUT("/:user_id", hnd.UpdateProfile)
+		api.PATCH("/:user_id/weight", hnd.UpdateWeight)
     }
 
     // Swagger

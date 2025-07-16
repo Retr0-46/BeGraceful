@@ -1,15 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/user_provider.dart';
+import 'package:intl/intl.dart';
 
 class DailyGoalCard extends StatelessWidget {
   const DailyGoalCard({super.key});
 
+  int _calculateAge(DateTime birthDate) {
+    final now = DateTime.now();
+    int age = now.year - birthDate.year;
+    if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+      age--;
+    }
+    return age;
+  }
+
+  double _activityMultiplier(String activityLevel) {
+    switch (activityLevel.toLowerCase()) {
+      case 'sedentary':
+        return 1.2;
+      case 'lightly active':
+        return 1.375;
+      case 'moderately active':
+        return 1.55;
+      case 'very active':
+        return 1.725;
+      case 'extra active':
+        return 1.9;
+      default:
+        return 1.2;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // TODO: Replace fake data for real calories, carbs, fats and proteins
-    final int calories = 1600;
-    final int protein = 148;
-    final int carbs = 30;
-    final int fat = 39;
+    final userProvider = Provider.of<UserProvider>(context);
+    final profile = userProvider.profile;
+    if (profile == null) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(child: Text('No profile data')),
+        ),
+      );
+    }
+
+    final gender = (profile['gender'] ?? '').toString().toLowerCase();
+    final weight = (profile['current_weight_kg'] ?? profile['weight_kg'] ?? profile['weight'] ?? 70).toDouble();
+    final height = (profile['height_cm'] ?? profile['height'] ?? 170).toDouble();
+    final birth = profile['date_of_birth'];
+    DateTime? birthDate;
+    int age = 30;
+    if (birth != null) {
+      try {
+        birthDate = DateTime.parse(birth);
+        age = _calculateAge(birthDate);
+      } catch (_) {}
+    }
+    final activityLevel = (profile['activity_level'] ?? 'sedentary').toString().toLowerCase();
+
+    // BMR
+    double bmr;
+    if (gender.startsWith('m')) {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+    final multiplier = _activityMultiplier(activityLevel);
+    final calories = (bmr * multiplier).round();
+    final protein = ((calories * 0.2) / 4).round();
+    final fat = ((calories * 0.3) / 9).round();
+    final carbs = ((calories * 0.5) / 4).round();
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -23,7 +84,7 @@ class DailyGoalCard extends StatelessWidget {
             Row(
               children: [
                 const Text(
-                  'Daily Goal ',
+                  'Daily Goal 🎯',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(width: 2),
@@ -35,7 +96,6 @@ class DailyGoalCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
             Center(
               child: Column(
                 children: [
@@ -57,9 +117,7 @@ class DailyGoalCard extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 16),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

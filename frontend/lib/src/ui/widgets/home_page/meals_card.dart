@@ -40,56 +40,69 @@ class MealsCard extends StatelessWidget {
     final totalFat = meal.entries.fold(0.0, (sum, e) => sum + e.fats);
     final totalCarbs = meal.entries.fold(0.0, (sum, e) => sum + e.carbs);
 
-    return ExpansionTile(
-      title: Text(meal.type, style: const TextStyle(fontWeight: FontWeight.bold)),
-      trailing: TextButton(
-        onPressed: () async {
-          final result = await showDialog<FoodItem>(
-            context: context,
-            builder: (context) => AddFoodDialog(
-              mealType: meal.type,
-              allFoodItems: allFoodItems,
-            ),
-          );
-
-          if (result != null) {
-            meal.entries.add(MealEntry(
-              name: result.name,
-              calories: result.calories,
-              proteins: result.protein,
-              fats: result.fat,
-              carbs: result.carbs,
-            ));
-            onMealUpdated(meal);
-          }
-        },
-        child: const Text('+ Add'),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(meal.type, style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextButton(
+              onPressed: () async {
+                final result = await showDialog<FoodItem>(
+                  context: context,
+                  builder: (context) => AddFoodDialog(
+                    mealType: meal.type,
+                    allFoodItems: allFoodItems,
+                  ),
+                );
+                if (result != null) {
+                  final newEntry = MealEntry(
+                    name: result.name,
+                    calories: result.calories,
+                    proteins: result.protein,
+                    fats: result.fat,
+                    carbs: result.carbs,
+                    mealType: meal.type,
+                  );
+                  final updatedEntries = List<MealEntry>.from(meal.entries)..add(newEntry);
+                  final updatedMeal = Meal(type: meal.type, entries: updatedEntries);
+                  onMealUpdated(updatedMeal);
+                }
+              },
+              child: const Text('+ Add'),
+            ),
+          ],
+        ),
         if (meal.entries.isEmpty)
           const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text('No items added yet.'),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text('No items added yet', style: TextStyle(color: Colors.grey)),
           ),
-        ...meal.entries.map((e) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('${e.name} x1'),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('${e.calories} kcal'),
-                      Text('P: ${e.proteins}g  F: ${e.fats}g  C: ${e.carbs}g', style: const TextStyle(fontSize: 10)),
-                    ],
-                  ),
-                ],
+        ...meal.entries.map((e) => Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: ListTile(
+                title: Text(e.name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                subtitle: Text('${e.calories} kcal, P: ${e.proteins.toStringAsFixed(2)}g, F: ${e.fats.toStringAsFixed(2)}g, C: ${e.carbs.toStringAsFixed(2)}g'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    final updatedEntries = List<MealEntry>.from(meal.entries)
+                      ..removeWhere((entry) => entry.name == e.name);
+                    final updatedMeal = Meal(type: meal.type, entries: updatedEntries);
+                    onMealUpdated(updatedMeal);
+                  },
+                ),
               ),
             )),
         if (meal.entries.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -98,14 +111,41 @@ class MealsCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text('$totalCalories kcal', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text('P: ${totalProtein}g  F: ${totalFat}g  C: ${totalCarbs}g', style: const TextStyle(fontSize: 10)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        _buildNutrientChip('P', totalProtein, Colors.red),
+                        const SizedBox(width: 8),
+                        _buildNutrientChip('F', totalFat, Colors.orange),
+                        const SizedBox(width: 8),
+                        _buildNutrientChip('C', totalCarbs, Colors.blue),
+                      ],
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-        const Divider(),
       ],
+    );
+  }
+
+  Widget _buildNutrientChip(String label, double value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        '$label: ${value.toStringAsFixed(1)}g',
+        style: TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }

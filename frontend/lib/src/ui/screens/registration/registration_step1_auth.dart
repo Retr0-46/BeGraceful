@@ -5,6 +5,7 @@ import 'package:frontend/src/providers/theme_provider.dart';
 import '../../themes/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../../providers/user_provider.dart';
 
 class RegistrationStep1 extends StatefulWidget {
   final VoidCallback onNext;
@@ -31,19 +32,24 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       setState(() => isLoading = true);
-      final success = await AuthService.register(
-        _emailController.text,
-        _passwordController.text,
-      );
-      setState(() => isLoading = false);
-
-      if (success) {
-        widget.data.email = _emailController.text;
-        widget.data.password = _passwordController.text;
-        widget.onNext();
-      } else {
-        setState(() => error = 'Registration failed. Try again.');
+      try {
+        final result = await AuthService.register(
+          _emailController.text,
+          _passwordController.text,
+        );
+        final userId = result['data']?['user_id'];
+        if (userId != null) {
+          Provider.of<UserProvider>(context, listen: false).setUserId(userId);
+          widget.data.email = _emailController.text;
+          widget.data.password = _passwordController.text;
+          widget.onNext();
+        } else {
+          setState(() => error = 'Registration failed. Try again.');
+        }
+      } catch (e) {
+        setState(() => error = e.toString());
       }
+      setState(() => isLoading = false);
     }
   }
 

@@ -4,6 +4,7 @@ class MealEntry {
   final double proteins;
   final double fats;
   final double carbs;
+  final String mealType;
 
   MealEntry({
     required this.name,
@@ -11,6 +12,7 @@ class MealEntry {
     required this.proteins,
     required this.fats,
     required this.carbs,
+    required this.mealType,
   });
 }
 

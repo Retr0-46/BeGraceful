@@ -2,14 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:frontend/src/models/registration_data.dart';
 import 'package:frontend/src/ui/screens/profile/edit_profile_screen.dart';
 import 'package:frontend/src/storage/user_temp_storage.dart';
+import 'package:provider/provider.dart';
+import 'package:frontend/src/providers/user_provider.dart';
+import 'package:frontend/src/services/auth_service.dart';
+import 'package:frontend/src/ui/screens/start_page.dart';
 
 class AccountCard extends StatelessWidget {
-  final void Function(RegistrationData updatedUser)? onProfileEdited;
+  final void Function(Map<String, dynamic> updatedUser)? onProfileEdited;
 
 const AccountCard({
   super.key,
   this.onProfileEdited,
 });
+
+  void _logout(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    
+    // Clear JWT and user data
+    AuthService.logout();
+    userProvider.logout();
+    
+    // Navigate to start page
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const StartPage()),
+      (route) => false, // Remove all previous routes
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +63,10 @@ Center(
   width: 240,
   child: OutlinedButton.icon(
     onPressed: () {
-      // TODO: Edit info
+      final user = Provider.of<UserProvider>(context, listen: false).profile;
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => EditProfileScreen(user: user)),
+      );
     },
     icon: Image.asset(
       'assets/images/profile_page/edit_icon.png',
@@ -75,9 +96,7 @@ Center(
       SizedBox(
         width: 240,
         child: ElevatedButton.icon(
-          onPressed: () {
-            // TODO: Реализовать logout
-          },
+          onPressed: () => _logout(context),
           icon: Image.asset(
             'assets/images/profile_page/logout_icon.png',
             height: 20,

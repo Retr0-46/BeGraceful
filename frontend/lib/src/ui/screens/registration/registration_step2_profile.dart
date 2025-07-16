@@ -5,6 +5,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frontend/src/providers/theme_provider.dart';
 import '../../themes/app_theme.dart';
 import 'package:provider/provider.dart';
+import '../../../providers/user_provider.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/profile_service.dart';
 
 class RegistrationStep2 extends StatefulWidget {
   final RegistrationData data;
@@ -20,31 +23,101 @@ class _RegistrationStep2State extends State<RegistrationStep2> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _birthDateController = TextEditingController();
+  final _lastNameController = TextEditingController();
 
   String? _gender;
   String? _activityLevel;
   String? _goal;
 
-  double _height = 0;
-  double _weight = 0;
+  double _height = 165;
+  double _weight = 65;
   double _goalWeight = 0;
 
-  void _submit() {
+  bool _isLoading = false;
+  String? _error;
+
+  void _submit() async {
     if (_formKey.currentState!.validate()) {
-      widget.data.username = _usernameController.text;
-      widget.data.gender = _gender;
-      widget.data.birthDate = DateTime.tryParse(_birthDateController.text);
-      widget.data.height = _height;
-      widget.data.weight = _weight;
-      widget.data.activityLevel = _activityLevel;
-      widget.data.goal = _goal;
-      widget.data.goalWeight = _goalWeight;
-      widget.onFinish();
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userId = userProvider.userId;
+      if (userId == null) {
+        setState(() {
+          _isLoading = false;
+          _error = 'User ID not found';
+        });
+        return;
+      }
+      // Преобразуем значения для backend
+      String? genderBackend;
+      if (_gender == 'Male') genderBackend = 'male';
+      else if (_gender == 'Female') genderBackend = 'female';
+      else genderBackend = 'other';
+
+      String? activityBackend;
+      if (_activityLevel?.contains('Sedentary') == true) activityBackend = 'low';
+      else if (_activityLevel?.contains('Lightly') == true) activityBackend = 'low';
+      else if (_activityLevel?.contains('Moderately') == true) activityBackend = 'moderate';
+      else if (_activityLevel?.contains('Very') == true) activityBackend = 'high';
+      else if (_activityLevel?.contains('Extra') == true) activityBackend = 'high';
+      else activityBackend = 'low';
+
+      String? objectiveBackend;
+      if (_goal == 'Lose weight') objectiveBackend = 'lose_weight';
+      else if (_goal == 'Maintain weight') objectiveBackend = 'maintain_weight';
+      else if (_goal == 'Gain weight') objectiveBackend = 'gain_weight';
+      else objectiveBackend = '';
+
+      // Ensure goalWeight respects backend validation (min 10)
+      final int goalKg = _goalWeight < 10 ? 10 : _goalWeight.toInt();
+
+      final profileData = {
+        'user_id': userId,
+        'first_name': _usernameController.text,
+        'last_name': _lastNameController.text,
+        'gender': genderBackend,
+        'date_of_birth': _birthDateController.text,
+        'height_cm': _height.toInt(),
+        'weight_kg': _weight.toInt(),
+        'activity_level': activityBackend,
+        'goal_weight_kg': goalKg,
+        'objective': objectiveBackend,
+      };
+      try {
+        final completeResult = await AuthService.completeProfile(profileData);
+        final jwt = completeResult['data']?['jwt'];
+        if (jwt != null) {
+          AuthService.saveJwt(jwt);
+          final userIdFromJwt = AuthService.getUserIdFromJwt(jwt);
+          if (userIdFromJwt != null) {
+            userProvider.setUserId(userIdFromJwt);
+            await tryLoadProfileWithRetry(userProvider);
+          }
+        }
+        setState(() => _isLoading = false);
+        widget.onFinish();
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+          _error = e is Exception ? e.toString() : 'Unknown error';
+        });
+      }
     }
   }
 
   void _adjustWeight(int delta) => setState(() => _weight = (_weight + delta).clamp(0, 500));
   void _adjustHeight(int delta) => setState(() => _height = (_height + delta).clamp(0, 300));
+
+  Future<void> tryLoadProfileWithRetry(UserProvider userProvider, {int retries = 5, Duration delay = const Duration(seconds: 1)}) async {
+    for (int i = 0; i < retries; i++) {
+      await Future.delayed(delay);
+      await userProvider.loadProfile();
+      if (userProvider.profile != null) return;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +183,12 @@ class _RegistrationStep2State extends State<RegistrationStep2> {
                 TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(labelText: 'Name'),
+                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _lastNameController,
+                  decoration: const InputDecoration(labelText: 'Last Name'),
                   validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 12),
@@ -194,21 +273,32 @@ class _RegistrationStep2State extends State<RegistrationStep2> {
                   decoration: const InputDecoration(labelText: 'Goal Weight (kg)'),
                   keyboardType: TextInputType.number,
                   onChanged: (val) => _goalWeight = double.tryParse(val) ?? 0,
-                  validator: (val) => double.tryParse(val ?? '') != null ? null : 'Enter number',
+                  validator: (val) {
+                    final num? parsed = double.tryParse(val ?? '');
+                    if (parsed == null) return 'Enter number';
+                    if (parsed < 10) return 'Min 10kg';
+                    return null;
+                  },
                 ),
 
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _submit,
+                    onPressed: _isLoading ? null : _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF6C63FF),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: const Text('Complete', style: TextStyle(color: Colors.white)),
+                    child: _isLoading
+                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : const Text('Complete', style: TextStyle(color: Colors.white)),
                   ),
                 ),
+                if (_error != null) ...[
+                  const SizedBox(height: 16),
+                  Text(_error!, style: const TextStyle(color: Colors.red)),
+                ],
               ],
             ),
           ),

@@ -25,7 +25,7 @@ class _MealsSectionState extends State<MealsSection> {
             children: [
               ...meal.entries.map((e) => ListTile(
                 title: Text(e.name),
-                subtitle: Text('${e.calories} kcal – P: ${e.proteins} F: ${e.fats} C: ${e.carbs}'),
+                subtitle: Text('${e.calories} kcal – P: ${e.proteins.toStringAsFixed(1)} F: ${e.fats.toStringAsFixed(1)} C: ${e.carbs.toStringAsFixed(1)}'),
               )),
               TextButton(
                 onPressed: () async {
@@ -38,16 +38,18 @@ class _MealsSectionState extends State<MealsSection> {
                   );
 
                   if (result != null) {
-                    setState(() {
-                      meal.entries.add(MealEntry(
-                        name: result.name,
-                        calories: result.calories,
-                        proteins: result.protein,
-                        fats: result.fat,
-                        carbs: result.carbs,
-                      ));
-                    });
-                    widget.onMealUpdated(meal);
+                    final newEntry = MealEntry(
+                      name: result.name,
+                      calories: result.calories,
+                      proteins: result.protein,
+                      fats: result.fat,
+                      carbs: result.carbs,
+                      mealType: meal.type,
+                    );
+                    // Создаём новый список и новый Meal
+                    final updatedEntries = List<MealEntry>.from(meal.entries)..add(newEntry);
+                    final updatedMeal = Meal(type: meal.type, entries: updatedEntries);
+                    widget.onMealUpdated(updatedMeal);
                   }
                 },
                 child: const Text('+ Add'),

@@ -31,10 +31,24 @@ class DaySummary {
 
   int get stepsCalories => (steps * 0.04).round(); // Пример формулы
 
-  int get caloriesRemaining => caloriesGoal - caloriesConsumed;
+  int get caloriesRemaining => (caloriesGoal - caloriesConsumed) < 0 ? 0 : (caloriesGoal - caloriesConsumed);
 
   double get carbs => meals.expand((meal) => meal.entries).fold(0.0, (sum, e) => sum + e.carbs);
   double get proteins => meals.expand((meal) => meal.entries).fold(0.0, (sum, e) => sum + e.proteins);
   double get fats => meals.expand((meal) => meal.entries).fold(0.0, (sum, e) => sum + e.fats);
+
+  DaySummary copyWith({
+    DateTime? date,
+    List<Meal>? meals,
+    List<Activity>? activities,
+    int? steps,
+  }) {
+    return DaySummary(
+      date: date ?? this.date,
+      meals: meals ?? this.meals,
+      activities: activities ?? this.activities,
+      steps: steps ?? this.steps,
+    );
+  }
 
 }

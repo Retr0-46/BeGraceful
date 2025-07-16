@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/src/ui/screens/profile/profile_screen.dart';
 import 'package:frontend/src/ui/screens/home_page.dart';
-import 'package:frontend/src/mock_data.dart';
-import 'package:frontend/src/storage/user_temp_storage.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -17,7 +15,6 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
 void initState() {
   super.initState();
-  UserTempStorage.setUser(demoUser); 
 }
 
   final List<Widget> _pages = [

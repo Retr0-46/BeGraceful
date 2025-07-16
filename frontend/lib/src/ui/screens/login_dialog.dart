@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../screens/registration/registration_page_navigator.dart';
+import '../screens/main_navigation.dart';
+import '../../providers/user_provider.dart';
+import '../../services/auth_service.dart';
+import 'package:provider/provider.dart';
 
 
 class LoginDialog extends StatefulWidget {
@@ -13,11 +17,65 @@ class _LoginDialogState extends State<LoginDialog> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  String? _error;
+  bool _isLoading = false;
 
-  void _login() {
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: handle login
-      Navigator.of(context).pop(); // Закрыть модалку
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      try {
+        final result = await AuthService.login(
+          _emailController.text,
+          _passwordController.text,
+        );
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        if (result['jwt'] != null) {
+          AuthService.saveJwt(result['jwt']);
+          final userId = AuthService.getUserIdFromJwt(result['jwt']);
+          if (userId != null) {
+            userProvider.setUserId(userId);
+            await tryLoadProfileWithRetry(userProvider);
+          }
+          setState(() => _isLoading = false);
+          Navigator.of(context).pop();
+          // Navigate to main app after successful login
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
+          );
+        } else if (result['user_id'] != null && result['status'] == 'INCOMPLETE_PROFILE') {
+          userProvider.setUserId(result['user_id']);
+          setState(() => _isLoading = false);
+          Navigator.of(context).pop();
+          // Переход к завершению профиля (например, RegistrationStep2)
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RegistrationPage()),
+          );
+        } else {
+          setState(() {
+            _isLoading = false;
+            _error = 'Login failed: Invalid credentials or incomplete profile.';
+          });
+        }
+      } catch (e) {
+        String errorMsg = 'Ошибка входа. Попробуйте ещё раз.';
+        final errStr = e.toString();
+        if (errStr.contains('INCOMPLETE_PROFILE')) {
+          errorMsg = 'Профиль пользователя не найден. Пожалуйста, зарегистрируйтесь или завершите создание профиля.';
+        }
+        setState(() => _error = errorMsg);
+      }
+    }
+  }
+
+  Future<void> tryLoadProfileWithRetry(UserProvider userProvider, {int retries = 5, Duration delay = const Duration(seconds: 1)}) async {
+    for (int i = 0; i < retries; i++) {
+      await Future.delayed(delay);
+      await userProvider.loadProfile();
+      if (userProvider.profile != null) return;
     }
   }
 
@@ -77,7 +135,7 @@ class _LoginDialogState extends State<LoginDialog> {
             const SizedBox(height: 20),
             // Gradient button
             GestureDetector(
-              onTap: _login,
+              onTap: _isLoading ? null : _login,
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -87,14 +145,20 @@ class _LoginDialogState extends State<LoginDialog> {
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Center(
-                  child: Text(
-                    'Log In',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
+                child: Center(
+                  child: _isLoading
+                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text(
+                          'Log In',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
                 ),
               ),
             ),
+            if (_error != null) ...[
+              const SizedBox(height: 16),
+              Text(_error!, style: const TextStyle(color: Colors.red)),
+            ],
             const SizedBox(height: 16),
             // Text below
             Row(

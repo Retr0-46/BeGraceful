@@ -39,6 +39,8 @@ func main() {
         grp.POST("/food", hnd.LogFood)
         grp.POST("/workout", hnd.LogWorkout)
         grp.GET("/summary", hnd.GetSummary)
+        grp.GET("/food", hnd.GetFoodEntries)
+        grp.GET("/workout", hnd.GetWorkoutEntries)
     }
     r.StaticFile("/swagger.yaml", "./swagger.yaml")
 

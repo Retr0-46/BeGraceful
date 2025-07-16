@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/src/models/registration_data.dart';
-import 'package:frontend/src/storage/user_temp_storage.dart';
 
 class ProgressCard extends StatefulWidget {
-  final RegistrationData user;
+  final Map<String, dynamic> user;
   final double currentWeight; 
   final void Function(double newWeight)? onWeightUpdated;
 
@@ -25,6 +23,16 @@ class _ProgressCardState extends State<ProgressCard> {
   void initState() {
     super.initState();
     currentWeight = widget.currentWeight;
+  }
+
+  @override
+  void didUpdateWidget(ProgressCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentWeight != widget.currentWeight) {
+      setState(() {
+        currentWeight = widget.currentWeight;
+      });
+    }
   }
 
   void _showUpdateDialog() async {
@@ -60,15 +68,14 @@ class _ProgressCardState extends State<ProgressCard> {
     );
 
     if (newWeight != null) {
-      UserTempStorage.updateWeight(newWeight);
       widget.onWeightUpdated?.call(newWeight);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final double? start = widget.user.weight; 
-    final double? goal = widget.user.goalWeight;
+    final double? start = (widget.user['weight_kg'] as num?)?.toDouble() ?? (widget.user['weight'] as num?)?.toDouble();
+    final double? goal = (widget.user['goal_weight_kg'] as num?)?.toDouble() ?? (widget.user['goal_weight'] as num?)?.toDouble();
 
     double progress = 0;
     double alreadyLost = 0;
@@ -113,7 +120,7 @@ class _ProgressCardState extends State<ProgressCard> {
                     style: TextStyle(fontWeight: FontWeight.w600), 
                   ),
                   TextSpan(
-                    text: widget.user.goal ?? '—',
+                    text: widget.user['goal'] ?? '—',
                   ),
                 ],
               ),
