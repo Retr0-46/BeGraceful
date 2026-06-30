@@ -52,4 +52,4 @@ BeGraceful/
 
 ## Team
 
-Built as a university project. Frontend and UI design by [Irina](https://github.com/1r444444).
+Built as a university project. Frontend and UI design by [Irina](https://github.com/1r444444), System and Backend design by [Mark](https://github.com/Retr0-46).
